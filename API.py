@@ -49,7 +49,7 @@ class DebugAPI:
         return request
 
     def get_user_id(self, request):
-        return 3757955941
+        return 375795594
 
     def get_chat_id(self, request):
         return -1

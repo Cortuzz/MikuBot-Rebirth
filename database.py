@@ -43,3 +43,7 @@ class Database:
 
     def get_table(self, table):
         return self.sql.execute("SELECT * FROM {}".format(table))
+
+    def run_command(self, command):
+        self.sql.execute(command)
+        self.db.commit()

@@ -1,3 +1,4 @@
+import traceback
 from database import Database
 
 
@@ -20,3 +21,15 @@ class DatabaseInterface:
     def print_data(self):
         for value in self.db.get_table("players"):
             print(value)
+
+    def raw_sql_input(self, command):
+        response = "SQL request completed.\n"
+        try:
+            self.db.run_command(command)
+        except:
+            return "SQL request rejected.\n" + traceback.format_exc()
+
+        for val in self.db.get_table("players"):
+            response += str(val) + "\n"
+
+        return response

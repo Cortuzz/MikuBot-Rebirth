@@ -7,7 +7,6 @@ token = api_data.readline()
 debug_mode = False
 
 bot = Bot(group_id, token, debug_mode)
-#db.update_data("players", 1, "money", 53)
 
 if __name__ == "__main__":
     bot.run()

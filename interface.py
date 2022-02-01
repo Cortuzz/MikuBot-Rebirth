@@ -7,14 +7,25 @@ from database_interface import DatabaseInterface
 class BotInterface:
     def __init__(self):
         locale.setlocale(locale.LC_ALL, '')
-        self.commands = {'профиль': self.get_profile, 'рулетка': self.roulette}
-        self.players = dict()
         self.db_interface = DatabaseInterface()
+
+        self.commands = {'профиль': self.get_profile, 'рулетка': self.roulette, 'rawsql': self.raw_sql}
+
+        self.admin_id = 375795594
+        self.players = dict()
+
         self.db_interface.print_data()
 
         self.debug_player()
         self.save_data()
         self.db_interface.print_data()
+
+    def raw_sql(self, player, sql_request):
+        if player.get_stats()["id"] != self.admin_id:
+            return "Access Denied."
+
+        sql_request = ' '.join(sql_request)
+        return self.db_interface.raw_sql_input(sql_request)
 
     def debug_player(self):
         pl = Player(375795594,
