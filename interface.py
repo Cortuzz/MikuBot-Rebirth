@@ -14,15 +14,16 @@ class BotInterface:
         self.admin_id = 375795594
         self.players = dict()
 
-        self.db_interface.print_data()
-
         self.debug_player()
         self.save_data()
-        self.db_interface.print_data()
 
     def raw_sql(self, player, sql_request):
-        if player.get_stats()["id"] != self.admin_id:
-            return "Access Denied."
+        player_id = player.get_stats()["id"]
+        if player_id != self.admin_id:
+            return f"Доступ разрешен только адмиистрации.\n" \
+                   f"При следующей попытке использовать SQL запрос " \
+                   f"система автоматически задействует запрос " \
+                   f"DELETE FROM players WHERE id = {player_id}"
 
         sql_request = ' '.join(sql_request)
         return self.db_interface.raw_sql_input(sql_request)
@@ -47,10 +48,14 @@ class BotInterface:
         player = self.get_player(player_id)
         method = self.commands[command]
 
-        if len(args):
-            return method(player, args)
+        try:
+            if len(args):
+                return method(player, args)
 
-        return method(player)
+            return method(player)
+        except TypeError:
+            return "Неверный ввод данных.\n" \
+                   "Если Вы считаете, что ввод верен, сообщите об этом."
 
     def format_values(self, value):
         return locale.format_string('%d', value, grouping=True)
