@@ -1,4 +1,5 @@
 import locale
+import traceback
 from player import Player
 from games import Casino
 from database_interface import DatabaseInterface
@@ -9,7 +10,8 @@ class BotInterface:
         locale.setlocale(locale.LC_ALL, '')
         self.db_interface = DatabaseInterface()
 
-        self.commands = {'профиль': self.get_profile, 'рулетка': self.roulette, 'rawsql': self.raw_sql}
+        self.commands = {'профиль': self.get_profile, 'рулетка': self.roulette, 'rawsql': self.raw_sql,
+                         'топ': self.get_money_top}
 
         self.admin_id = 375795594
         self.players = dict()
@@ -34,6 +36,16 @@ class BotInterface:
 
         self.players.update({375795594: pl})
 
+    def get_money_top(self, player):
+        text = "Список игроков с наибольшим количеством денег:"
+        count = 0
+
+        for i in self.db_interface.get_max("money"):
+            count += 1
+            text += f"\n{count}. {i[1]} - {self.format_values(i[3])}₽"
+
+        return text
+
     def get_player(self, player_id):
         return self.players[player_id]
 
@@ -54,6 +66,7 @@ class BotInterface:
 
             return method(player)
         except TypeError:
+            return traceback.format_exc()
             return "Неверный ввод данных.\n" \
                    "Если Вы считаете, что ввод верен, сообщите об этом."
 

@@ -41,6 +41,9 @@ class Database:
         # self.sql.execute(f"DROP TABLE {table}")
         self.db.commit()
 
+    def get_max_values(self, table, data, count):
+        return self.sql.execute(f"SELECT * FROM {table} ORDER BY {data} DESC LIMIT {count}")
+
     def get_table(self, table):
         return self.sql.execute("SELECT * FROM {}".format(table))
 
