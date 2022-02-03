@@ -17,7 +17,7 @@ class BotInterface:
         self.players = dict()
 
         self.debug_player()
-        self.save_data()
+        self.reload_data()
 
     def raw_sql(self, player, sql_request):
         player_id = player.get_stats()["id"]
@@ -58,7 +58,10 @@ class BotInterface:
             self.add_player(player_id)
 
         player = self.get_player(player_id)
-        method = self.commands[command]
+        try:
+            method = self.commands[command]
+        except KeyError:
+            return
 
         try:
             if len(args):
@@ -66,9 +69,10 @@ class BotInterface:
 
             return method(player)
         except TypeError:
-            return traceback.format_exc()
-            return "Неверный ввод данных.\n" \
-                   "Если Вы считаете, что ввод верен, сообщите об этом."
+            return f"Ошибка при выполнении команды {command}\n" \
+                   f"Аргументы: {args}\n{traceback.format_exc()}"
+            # return "Неверный ввод данных.\n" \
+            # "Если Вы считаете, что ввод верен, сообщите об этом."
 
     def format_values(self, value):
         return locale.format_string('%d', value, grouping=True)
@@ -102,6 +106,15 @@ class BotInterface:
 
         return response
 
+    def change_player_value(self, player, value, difference, is_absolute=False):
+        if player.change_value(value, difference, is_absolute):
+            stats = player.get_stats()
+            self.db_interface.update_player_data(stats['id'], value, stats[value])
+
+            return True
+
+        return False
+
     def roulette(self, player, args):
         if len(args) != 2:
             return 'Укажите ставку и значение [номер/четность/цвет].'
@@ -120,7 +133,7 @@ class BotInterface:
             if value not in ('чет', 'нечет', 'к', 'ч'):
                 return 'Неверные данные.'
 
-        if not player.change_value('money', -bet):
+        if not self.change_player_value(player, 'money', -bet):
             return 'Недостаточно средств.'
 
         color = {'к': '🔴', 'ч': '⚫', 'з': '🟢'}
@@ -130,7 +143,7 @@ class BotInterface:
 
         if data[0]:
             text += 'Вы выиграли {}$.'.format(self.format_values(data[0] - bet))
-            player.change_value('money', data[0])
+            self.change_player_value(player, 'money', data[0])
 
         else:
             text += 'Ваша ставка сгорела.'
@@ -170,6 +183,18 @@ class BotInterface:
             return False
 
         return bet
+
+    def reload_data(self):
+        data = self.db_interface.get_players_data()
+        self.players.clear()
+
+        for stat in data:
+            player_id = stat[0]
+            stats = {'nickname': stat[1], 'experience': stat[2],
+                     'money': stat[3], 'job': stat[4]}
+
+            player = Player(player_id, stats)
+            self.players.update({player_id: player})
 
     def save_data(self):
         savable = 'nickname', 'experience', 'money', 'job'

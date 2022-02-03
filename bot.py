@@ -10,6 +10,7 @@ class Bot:
         self.debug = debug
 
         self.api = DebugAPI(self.group_id, self.token)
+        self.api = VkAPI(self.group_id, self.token)
 
         self.interface = BotInterface()
         self.handler = self.api.get_handler()
@@ -33,4 +34,5 @@ class Bot:
         args = request[1:]
 
         text = self.interface.try_command(command, player_id, *args)
-        self.api.response(text, player_id, chat_id)
+        if text is not None:
+            self.api.response(text, player_id, chat_id)

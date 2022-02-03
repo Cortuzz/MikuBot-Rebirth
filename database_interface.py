@@ -18,9 +18,8 @@ class DatabaseInterface:
 
         self.db.update_data("players", player_id, type, value)
 
-    def print_data(self):
-        for value in self.db.get_table("players"):
-            print(value)
+    def get_players_data(self):
+        return self.db.get_table("players")
 
     def raw_sql_input(self, command):
         response = "SQL request completed."
