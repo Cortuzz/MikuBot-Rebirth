@@ -19,7 +19,8 @@ class Player:
         return self.stats
 
     def get_level(self):
-        return self.experience**(1/4) * log2(self.experience)**(1/4)
+        level = self.experience**(1/4) * log2(self.experience)**(1/4)
+        return level if level < 80 else 80
 
     def change_value(self, value, difference, is_absolutely=False):
         if is_absolutely and difference < 0:

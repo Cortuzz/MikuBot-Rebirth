@@ -1,4 +1,5 @@
 from random import randint, choice
+from enum import Enum
 
 
 class Casino:
@@ -117,3 +118,12 @@ class BlackJack:
             dealer_bj = True
 
         return score, self.cards, self.dealer_cards, dealer_score, player_bj, dealer_bj
+
+
+class SecretHitler:
+    class Article(Enum):
+
+    def __init__(self):
+        self.deck =
+        self.used_deck
+

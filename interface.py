@@ -11,13 +11,22 @@ class BotInterface:
         self.db_interface = DatabaseInterface()
 
         self.commands = {'профиль': self.get_profile, 'рулетка': self.roulette, 'rawsql': self.raw_sql,
-                         'топ': self.get_money_top}
+                         'топ': self.get_money_top, 'уровни': self.get_levels}
 
+        self.levels = self.get_levels_statistics()
         self.admin_id = 375795594
         self.players = dict()
 
         self.debug_player()
         self.reload_data()
+
+    def get_levels_statistics(self):
+        file = open('levels_statistics.txt')
+        levels = []
+        for line in file:
+            levels.append(int(line))
+
+        return levels
 
     def raw_sql(self, player, sql_request):
         player_id = player.get_stats()["id"]
@@ -28,7 +37,10 @@ class BotInterface:
                    f"DELETE FROM players WHERE id = {player_id}"
 
         sql_request = ' '.join(sql_request)
-        return self.db_interface.raw_sql_input(sql_request)
+        sql_response = self.db_interface.raw_sql_input(sql_request)
+        self.reload_data()
+
+        return sql_response
 
     def debug_player(self):
         pl = Player(375795594,
@@ -76,6 +88,17 @@ class BotInterface:
 
     def format_values(self, value):
         return locale.format_string('%d', value, grouping=True)
+
+    def get_levels(self, player):
+        reached, unreached = '✅', '🚫'
+        text = "Уровни и необходимое количество опыта для их получения:"
+        player_level = player.get_stats()['level']
+
+        for i in range(80):
+            text += f"\n{i + 1} level - {self.format_values(self.levels[i])} exp. " \
+                    f"[{reached if player_level > i + 1 else unreached}]"
+
+        return text
 
     def get_profile(self, player):
         localization = {
