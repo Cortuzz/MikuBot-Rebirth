@@ -10,7 +10,9 @@ class Bot:
         self.debug = debug
 
         self.api = DebugAPI(self.group_id, self.token)
-        self.api = VkAPI(self.group_id, self.token)
+
+        if not self.debug:
+            self.api = VkAPI(self.group_id, self.token)
 
         self.interface = BotInterface()
         self.handler = self.api.get_handler()

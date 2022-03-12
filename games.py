@@ -43,6 +43,31 @@ class Casino:
 
         return bet * bet_multiplier, ball_value, color
 
+    def slot_machine(self, bet):
+        symbols = '🍒' * 5 + '🍓' * 5 + '💥' * 3 + '⭐' * 2 + '💎'
+        symbols_double_worth = {'🍒': 1, '🍓': 2, '💥': 3, '⭐': 5, '💎': 7}
+        symbols_triple_worth = {'🍒': 4, '🍓': 8, '💥': 10, '⭐': 20, '💎': 100}
+        rows = []
+        string_rows = ""
+
+        for i in range(3):
+            rows.append([])
+            for j in range(3):
+                symbol = choice(symbols)
+                rows[i].append(symbol)
+                string_rows += symbol + " "
+            string_rows += "\n"
+
+        win_line = rows[1]
+        if (win_line[0] == win_line[1] == win_line[2]):
+            return bet * symbols_triple_worth[win_line[0]], string_rows
+
+        for i in range(3):
+            for j in range(i + 1, 3):
+                if win_line[i] == win_line[j]:
+                    return bet * symbols_double_worth[win_line[i]], string_rows
+
+        return 0, string_rows
 
 class BlackJack:
     def __init__(self, bet):
@@ -117,3 +142,7 @@ class BlackJack:
             dealer_bj = True
 
         return score, self.cards, self.dealer_cards, dealer_score, player_bj, dealer_bj
+
+
+casino = Casino()
+casino.slot_machine(300)

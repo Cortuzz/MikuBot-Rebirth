@@ -10,8 +10,8 @@ class BotInterface:
         locale.setlocale(locale.LC_ALL, '')
         self.db_interface = DatabaseInterface()
 
-        self.commands = {'профиль': self.get_profile, 'рулетка': self.roulette, 'rawsql': self.raw_sql,
-                         'топ': self.get_money_top}
+        self.commands = {'профиль': self.get_profile, 'рулетка': self.roulette, 'слот': self.slot_machine,
+                         'rawsql': self.raw_sql, 'топ': self.get_money_top}
 
         self.admin_id = 375795594
         self.players = dict()
@@ -22,10 +22,7 @@ class BotInterface:
     def raw_sql(self, player, sql_request):
         player_id = player.get_stats()["id"]
         if player_id != self.admin_id:
-            return f"Доступ разрешен только адмиистрации.\n" \
-                   f"При следующей попытке использовать SQL запрос " \
-                   f"система автоматически задействует запрос " \
-                   f"DELETE FROM players WHERE id = {player_id}"
+            return
 
         sql_request = ' '.join(sql_request)
         return self.db_interface.raw_sql_input(sql_request)
@@ -150,6 +147,30 @@ class BotInterface:
 
         return text
 
+    def slot_machine(self, player, args):
+        if len(args) != 1:
+            return 'Укажите ставку.'
+
+        bet = self.convert_bets(player, args[0])
+        if not bet:
+            return 'Неверная ставка.'
+
+        if not self.change_player_value(player, 'money', -bet):
+            return 'Недостаточно средств.'
+
+        casino = Casino()
+        data = casino.slot_machine(bet)
+        win, table = data
+        self.change_player_value(player, 'money', win)
+
+        if not win:
+            return "Вы проиграли😟\n{}".format(table)
+
+        if data[0] == bet:
+            return "Ушли в ноль🤔\n{}".format(table)
+
+        return "🤑Вы выиграли {}$\n{}".format(self.format_values(win - bet), table)
+
     def convert_bets(self, player, bet):
         money = player.get_stats()['money']
         if bet in ('все', 'всё'):
@@ -197,7 +218,7 @@ class BotInterface:
             self.players.update({player_id: player})
 
     def save_data(self):
-        savable = 'nickname', 'experience', 'money', 'job'
+        savable = 'nickname', 'experience', 'money', 'job' # todo: create "not savable"
         for player_id in self.players:
             player = self.players[player_id]
             stats = player.get_stats()
